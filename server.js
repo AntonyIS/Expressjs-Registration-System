@@ -13,7 +13,8 @@ app.use(express.static(__dirname + '/public'));
 app.use(session({
     secret: 'secret',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie:{maxAge:70000}
 }));
 
 // for parsing application/json

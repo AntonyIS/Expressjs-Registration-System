@@ -8,7 +8,7 @@ const path = require('path');
 router.get('/signup', function (req, res) {
     res.render('signup')
 });
-router.post('/signup', function (req,res) {
+router.post('/signup', function (req,res, next) {
     var first_name = req.body.first_name;
     var last_name = req.body.last_name;
     var email = req.body.email;
@@ -22,22 +22,27 @@ router.post('/signup', function (req,res) {
         res.send("Password did not match")
     }
     // check if user exists in the system
-    var sql = "SELECT * FROM `users` WHERE email = '"+email+"' AND password = '"+password+"'";
+    var sql = "SELECT * FROM `users` WHERE email = '"+email+"' AND password = '"+ password+"'";
     db.query(sql, function (err,results, next) {
-        if(results.length > 0){
-            res.redirect('/users/signup/')
+        if(!results.length > 0){
+            var query = "INSERT INTO `users`(`id`, `first_name`, `last_name`, `email`, `password`) VALUES (NULL,'"+first_name+"','"+last_name+"','"+email+"','"+password+"')";
+            db.query(query, function (err, result) {
+                if(err){
+                    throw err;
+                }else{
+                    res.render('login');
+                }
+            });
+        }else{
+            message = "User already exists, login ";
+            res.render('login', {message:message})
         }
 
     });
 
 
-    var sql = "INSERT INTO `users`(`id`, `first_name`, `last_name`, `email`, `password`) VALUES (NULL,'"+first_name+"','"+last_name+"','"+email+"','"+password+"')";
-    db.query(sql, function (err, result) {
-        if(err){
-            throw err;
-        }
-    });
-    res.render('login');
+
+
 });
 
 // localhost:8000/users/login/
@@ -51,20 +56,33 @@ router.post('/login', function (req, res) {
     if(email && password){
         var sql = "SELECT * FROM `users` WHERE email = '"+email+"' AND password = '"+password+"'";
         db.query(sql, function (err,results) {
-            if(results.length > 0){
-                req.session.loggedin = true;
-                req.session.email = email;
-                res.redirect('/');
-            }else{
-                res.render('login', error="Incorrect username and / or password")
+            if(!results.length > 0){
+                error="Incorrect username and / or password";
+                res.render('login',{message:error} )
             }
-            res.end();
+            req.session.loggedin = true;
+            req.session.email = email;
+            res.locals.user = req.session.loggedin ;
+            console.log(req.session.loggedin);
+            res.redirect('/');
         })
     }else{
-        res.send("Please enter Username and Password");
-        res.end();
+        var message = "Please fill in all fields";
+        res.render('login',{message:message})
     }
 
 });
 
+
+router.get('/logout', function (req, res, next) {
+    if(req.session){
+        req.session.destroy(function (err) {
+            if(err){
+                throw err;
+            }else{
+                res.redirect('/')
+            }
+        })
+    }
+});
 module.exports = router;
