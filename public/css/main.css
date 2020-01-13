@@ -9,6 +9,7 @@ fieldset{
     text-align: center;
     font-family: monospace;
     border: 1px solid powderblue;
+    color: #333333;
 }
 .form-group input{
     width: 350px;

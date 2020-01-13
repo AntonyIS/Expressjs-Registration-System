@@ -11,6 +11,7 @@ app.engine('hbs', hbs({layoutsDir: __dirname + '/views/layouts', extname: 'hbs'}
 app.use(express.static(__dirname + '/public'));
 
 app.use(session({
+    // key: 'user_sid',
     secret: 'secret',
     resave: true,
     saveUninitialized: true,
@@ -28,8 +29,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(upload.array());
 app.use(express.static('public'));
 
+// app.use((req, res, next) => {
+//     if (req.cookies.user_sid && !req.session.user) {
+//         res.clearCookie('user_sid');
+//     }
+//     next();
+// });
 // routes
-app.get('/', function (req, res) {
+app.get('/', function (req, res) {http://localhost:8000/
+    console.log(req.session.loggedin =='undefined');
     res.render('index')
 });
 // localhost:8000/users/

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../dbconfig/db');
 const path = require('path');
+const bycrypt = require('bcrypt');
 
 // signup user
 // localhost:8000/users/signup/
@@ -17,7 +18,11 @@ router.post('/signup', function (req,res, next) {
 
     // check if password matched
     if (password1 == password2){
-        password = password1
+        password =  bycrypt.hash(password1, 10,function (err,hash) {
+            password = hash
+            console.log(password)
+        });
+
     }else{
         res.send("Password did not match")
     }
@@ -62,8 +67,7 @@ router.post('/login', function (req, res) {
             }
             req.session.loggedin = true;
             req.session.email = email;
-            res.locals.user = req.session.loggedin ;
-            console.log(req.session.loggedin);
+            // res.locals.user = req.session.loggedin ;
             res.redirect('/');
         })
     }else{
